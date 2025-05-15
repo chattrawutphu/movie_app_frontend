@@ -1,0 +1,725 @@
+===== บทที่ 2: Widget และการสร้าง UI ใน Flutter =====
+
+Flutter สร้างขึ้นมาบนหลักการที่ว่า "ทุกอย่างคือ Widget" การเข้าใจเรื่อง Widget และการทำงานของมันจึงเป็นสิ่งสำคัญมากในการพัฒนาแอพ Flutter ได้อย่างมีประสิทธิภาพ
+
+--- 2.1 Widget คืออะไร? ---
+
+Widget คือส่วนประกอบพื้นฐานของ UI ใน Flutter ที่อธิบายว่าส่วนนั้นของ UI ควรจะมีลักษณะอย่างไร โดยอิงจากการกำหนดค่าและสถานะปัจจุบัน
+
+ใน Flutter ทุกอย่างคือ Widget ตั้งแต่ปุ่ม, ข้อความ, รูปภาพ, ไปจนถึงเค้าโครงหน้าจอทั้งหมด โดย Widget จะถูกจัดเรียงเป็นโครงสร้างต้นไม้ที่เรียกว่า "Widget Tree"
+
+ประเภทหลักของ Widget ใน Flutter:
+
+1. StatelessWidget - Widget ที่ไม่มีสถานะภายใน (ไม่เปลี่ยนแปลงเมื่อเวลาผ่านไป)
+2. StatefulWidget - Widget ที่มีสถานะภายใน (สามารถเปลี่ยนแปลงเมื่อเวลาผ่านไป)
+
+--- 2.2 StatelessWidget vs StatefulWidget ---
+
+### StatelessWidget
+```dart
+class WelcomeText extends StatelessWidget {
+  final String name;
+  
+  const WelcomeText({Key? key, required this.name}) : super(key: key);
+  
+  @override
+  Widget build(BuildContext context) {
+    return Text('สวัสดี, $name!');
+  }
+}
+```
+
+- ใช้เมื่อ UI ไม่ต้องเปลี่ยนแปลงตามเวลาหรือปฏิสัมพันธ์ของผู้ใช้
+- มีเพียงเมธอด `build()` ที่ต้องทำการ override
+- ข้อมูลที่ส่งเข้าไป (props) จะถูกกำหนดเป็น final
+- เหมาะสำหรับ UI ที่แสดงผลเหมือนเดิมทุกครั้ง เช่น ข้อความคงที่, ไอคอน, รูปภาพ
+
+### StatefulWidget
+```dart
+class Counter extends StatefulWidget {
+  const Counter({Key? key}) : super(key: key);
+  
+  @override
+  _CounterState createState() => _CounterState();
+}
+
+class _CounterState extends State<Counter> {
+  int _count = 0;
+  
+  void _increment() {
+    setState(() {
+      _count++;
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('จำนวนครั้งที่กด: $_count'),
+        ElevatedButton(
+          onPressed: _increment,
+          child: Text('เพิ่ม'),
+        ),
+      ],
+    );
+  }
+}
+```
+
+- ใช้เมื่อ UI ต้องเปลี่ยนแปลงตามเวลาหรือปฏิสัมพันธ์ของผู้ใช้
+- ประกอบด้วย 2 คลาส: Widget class และ State class
+- State class มีเมธอด `setState()` ที่ใช้บอก Flutter ให้อัพเดต UI
+- เหมาะสำหรับหน้าจอที่มีการโต้ตอบ เช่น ฟอร์ม, เกม, การแสดงข้อมูลที่เปลี่ยนแปลงตามเวลา
+
+--- 2.3 Widget พื้นฐานที่ควรรู้จัก ---
+
+### 1. Layout Widgets
+Widget ที่ใช้จัดวางองค์ประกอบ UI:
+
+- **Container**: Widget อเนกประสงค์ที่สามารถกำหนดขนาด, สี, ขอบ และอื่นๆ
+```dart
+Container(
+  width: 200,
+  height: 100,
+  padding: EdgeInsets.all(16),
+  margin: EdgeInsets.symmetric(vertical: 8),
+  decoration: BoxDecoration(
+    color: Colors.blue,
+    borderRadius: BorderRadius.circular(8),
+  ),
+  child: Text('สวัสดี Flutter!'),
+)
+```
+
+- **Row และ Column**: จัดเรียงวิดเจ็ตแนวนอนและแนวตั้ง
+```dart
+Column(
+  mainAxisAlignment: MainAxisAlignment.center,
+  crossAxisAlignment: CrossAxisAlignment.start,
+  children: [
+    Text('รายการที่ 1'),
+    Text('รายการที่ 2'),
+    Text('รายการที่ 3'),
+  ],
+)
+```
+
+- **Stack**: วาง Widget ซ้อนกัน
+```dart
+Stack(
+  children: [
+    Image.asset('assets/background.jpg'),
+    Positioned(
+      bottom: 16,
+      right: 16,
+      child: Text('คำอธิบายภาพ'),
+    ),
+  ],
+)
+```
+
+### 2. Content Widgets
+Widget ที่แสดงเนื้อหา:
+
+- **Text**: แสดงข้อความ
+```dart
+Text(
+  'สวัสดี Flutter!',
+  style: TextStyle(
+    fontSize: 24,
+    fontWeight: FontWeight.bold,
+    color: Colors.blue,
+  ),
+)
+```
+
+- **Image**: แสดงรูปภาพ
+```dart
+// จากทรัพยากรในแอพ
+Image.asset('assets/images/logo.png')
+
+// จาก URL
+Image.network('https://example.com/image.jpg')
+```
+
+- **Icon**: แสดงไอคอน
+```dart
+Icon(
+  Icons.favorite,
+  color: Colors.red,
+  size: 24,
+)
+```
+
+### 3. Input Widgets
+Widget ที่รับข้อมูลจากผู้ใช้:
+
+- **TextField**: ช่องป้อนข้อความ
+```dart
+TextField(
+  decoration: InputDecoration(
+    labelText: 'อีเมล',
+    hintText: 'กรุณาใส่อีเมลของคุณ',
+    border: OutlineInputBorder(),
+  ),
+  onChanged: (value) {
+    print('ข้อความที่ป้อน: $value');
+  },
+)
+```
+
+- **ElevatedButton, TextButton, OutlinedButton**: ปุ่มรูปแบบต่างๆ
+```dart
+ElevatedButton(
+  onPressed: () {
+    print('กดปุ่ม!');
+  },
+  child: Text('กดฉัน'),
+)
+```
+
+- **Checkbox, Switch, Radio**: ตัวเลือกรูปแบบต่างๆ
+```dart
+Checkbox(
+  value: true,
+  onChanged: (value) {
+    print('Checkbox: $value');
+  },
+)
+```
+
+### 4. Scrolling Widgets
+Widget ที่ช่วยให้สามารถเลื่อนดูเนื้อหาได้:
+
+- **ListView**: รายการที่สามารถเลื่อนดูได้
+```dart
+ListView.builder(
+  itemCount: 100,
+  itemBuilder: (context, index) {
+    return ListTile(
+      title: Text('รายการที่ ${index + 1}'),
+    );
+  },
+)
+```
+
+- **SingleChildScrollView**: ทำให้ Widget เดี่ยวสามารถเลื่อนดูได้
+```dart
+SingleChildScrollView(
+  child: Column(
+    children: List.generate(20, (index) {
+      return Container(
+        height: 100,
+        color: Colors.primaries[index % Colors.primaries.length],
+        child: Center(
+          child: Text('รายการที่ ${index + 1}'),
+        ),
+      );
+    }),
+  ),
+)
+```
+
+- **GridView**: แสดงข้อมูลเป็นตาราง
+```dart
+GridView.builder(
+  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+    crossAxisCount: 2,
+    mainAxisSpacing: 10,
+    crossAxisSpacing: 10,
+  ),
+  itemCount: 10,
+  itemBuilder: (context, index) {
+    return Container(
+      color: Colors.teal,
+      child: Center(
+        child: Text('ช่องที่ ${index + 1}'),
+      ),
+    );
+  },
+)
+```
+
+--- 2.4 การจัดเรียง Layout ใน Flutter ---
+
+### การจัดการขนาดของ Widget
+- **Expanded**: ให้ Widget ขยายขนาดเต็มพื้นที่ที่เหลือใน Row หรือ Column
+```dart
+Row(
+  children: [
+    Container(width: 100, color: Colors.red),
+    Expanded(
+      child: Container(color: Colors.blue),
+    ),
+    Container(width: 100, color: Colors.green),
+  ],
+)
+```
+
+- **Flexible**: คล้ายกับ Expanded แต่สามารถกำหนดสัดส่วนได้
+```dart
+Row(
+  children: [
+    Flexible(
+      flex: 1,
+      child: Container(color: Colors.red),
+    ),
+    Flexible(
+      flex: 2,
+      child: Container(color: Colors.blue),
+    ),
+  ],
+)
+```
+
+- **SizedBox**: กำหนดขนาดแน่นอนให้กับ Widget
+```dart
+SizedBox(
+  width: 200,
+  height: 100,
+  child: Container(color: Colors.purple),
+)
+```
+
+### การจัดตำแหน่งใน Layout
+- **MainAxisAlignment**: จัดตำแหน่งใน Row และ Column ตามแกนหลัก
+- **CrossAxisAlignment**: จัดตำแหน่งใน Row และ Column ตามแกนขวาง
+```dart
+Column(
+  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  crossAxisAlignment: CrossAxisAlignment.center,
+  children: [
+    Text('ด้านบน'),
+    Text('ตรงกลาง'),
+    Text('ด้านล่าง'),
+  ],
+)
+```
+
+### การใช้ Padding และ Margin
+- **Padding**: ระยะห่างภายใน Widget
+```dart
+Padding(
+  padding: EdgeInsets.all(16),
+  child: Text('ข้อความนี้มี padding'),
+)
+```
+
+- **Margin** (ด้วย Container): ระยะห่างภายนอก Widget
+```dart
+Container(
+  margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+  child: Text('ข้อความนี้มี margin'),
+)
+```
+
+--- 2.5 Material Design ใน Flutter ---
+
+Flutter มาพร้อมกับ Material Design ซึ่งเป็นแนวทางการออกแบบจาก Google โดยมี Widget ที่เกี่ยวข้องมากมาย:
+
+### Scaffold
+เป็น Widget หลักที่ใช้สร้างโครงหน้าจอตาม Material Design
+```dart
+Scaffold(
+  appBar: AppBar(
+    title: Text('ชื่อแอพ'),
+  ),
+  body: Center(
+    child: Text('เนื้อหาหลัก'),
+  ),
+  floatingActionButton: FloatingActionButton(
+    onPressed: () {},
+    child: Icon(Icons.add),
+  ),
+  drawer: Drawer(
+    child: ListView(
+      children: [
+        DrawerHeader(
+          child: Text('เมนู'),
+        ),
+        ListTile(
+          title: Text('หน้าหลัก'),
+          onTap: () {},
+        ),
+        ListTile(
+          title: Text('ตั้งค่า'),
+          onTap: () {},
+        ),
+      ],
+    ),
+  ),
+  bottomNavigationBar: BottomNavigationBar(
+    items: [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home),
+        label: 'หน้าหลัก',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.search),
+        label: 'ค้นหา',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.person),
+        label: 'โปรไฟล์',
+      ),
+    ],
+    currentIndex: 0,
+    onTap: (index) {},
+  ),
+)
+```
+
+### Material Components
+- **Card**: แสดงข้อมูลในรูปแบบการ์ด
+```dart
+Card(
+  elevation: 4,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(8),
+  ),
+  child: Padding(
+    padding: EdgeInsets.all(16),
+    child: Column(
+      children: [
+        Text('หัวข้อการ์ด', style: TextStyle(fontSize: 18)),
+        SizedBox(height: 8),
+        Text('เนื้อหาของการ์ด'),
+      ],
+    ),
+  ),
+)
+```
+
+- **ListTile**: Widget ที่ออกแบบมาสำหรับแสดงรายการใน ListView
+```dart
+ListTile(
+  leading: Icon(Icons.person),
+  title: Text('ชื่อผู้ใช้'),
+  subtitle: Text('รายละเอียดเพิ่มเติม'),
+  trailing: Icon(Icons.arrow_forward),
+  onTap: () {},
+)
+```
+
+--- 2.6 การใช้ Theme ใน Flutter ---
+
+Theme ช่วยให้คุณกำหนดรูปแบบสีและการออกแบบทั่วทั้งแอพได้อย่างสอดคล้องกัน:
+
+```dart
+MaterialApp(
+  theme: ThemeData(
+    primarySwatch: Colors.blue,
+    brightness: Brightness.light,
+    textTheme: TextTheme(
+      headline1: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      bodyText1: TextStyle(fontSize: 16, color: Colors.black87),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        primary: Colors.blue,
+        onPrimary: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+    ),
+  ),
+  darkTheme: ThemeData(
+    primarySwatch: Colors.indigo,
+    brightness: Brightness.dark,
+    // ...กำหนดค่าอื่นๆ สำหรับ dark theme
+  ),
+  themeMode: ThemeMode.system, // system, light, dark
+  home: HomeScreen(),
+)
+```
+
+การใช้ Theme ในโค้ด:
+```dart
+Text(
+  'หัวข้อ',
+  style: Theme.of(context).textTheme.headline1,
+)
+```
+
+--- 2.7 การสร้างหน้าจอแบบพื้นฐาน ---
+
+ตัวอย่างหน้าจอ Login:
+```dart
+class LoginScreen extends StatefulWidget {
+  const LoginScreen({Key? key}) : super(key: key);
+
+  @override
+  _LoginScreenState createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final _formKey = GlobalKey<FormState>();
+  final _emailController = TextEditingController();
+  final _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  void _login() {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      
+      // จำลองการเรียก API
+      Future.delayed(Duration(seconds: 2), () {
+        setState(() {
+          _isLoading = false;
+        });
+        // นำทางไปยังหน้าถัดไป
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('เข้าสู่ระบบ'),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.asset(
+                'assets/images/logo.png',
+                height: 100,
+              ),
+              SizedBox(height: 32),
+              TextFormField(
+                controller: _emailController,
+                decoration: InputDecoration(
+                  labelText: 'อีเมล',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.email),
+                ),
+                keyboardType: TextInputType.emailAddress,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'กรุณาใส่อีเมล';
+                  }
+                  if (!value.contains('@')) {
+                    return 'กรุณาใส่อีเมลที่ถูกต้อง';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 16),
+              TextFormField(
+                controller: _passwordController,
+                decoration: InputDecoration(
+                  labelText: 'รหัสผ่าน',
+                  border: OutlineInputBorder(),
+                  prefixIcon: Icon(Icons.lock),
+                ),
+                obscureText: true,
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'กรุณาใส่รหัสผ่าน';
+                  }
+                  if (value.length < 6) {
+                    return 'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร';
+                  }
+                  return null;
+                },
+              ),
+              SizedBox(height: 24),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _login,
+                  child: _isLoading
+                    ? CircularProgressIndicator(color: Colors.white)
+                    : Text('เข้าสู่ระบบ'),
+                ),
+              ),
+              SizedBox(height: 16),
+              TextButton(
+                onPressed: () {
+                  // นำทางไปยังหน้าลงทะเบียน
+                },
+                child: Text('ยังไม่มีบัญชี? ลงทะเบียน'),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+```
+
+--- 2.8 แบบฝึกหัด ---
+
+1. อธิบายความแตกต่างระหว่าง Container, SizedBox และ Padding
+2. จงออกแบบ Widget ที่ใช้ Row และ Column ในการแสดงข้อมูลที่มีรูปแบบซับซ้อน
+3. เมื่อใดควรใช้ StatelessWidget และเมื่อใดควรใช้ StatefulWidget? ยกตัวอย่างประกอบ
+4. อธิบายความหมายของคำสั่ง `setState(() { ... })` และความสำคัญต่อการอัพเดต UI
+5. จงเขียนโค้ดสร้างแอพที่มีหน้าจอ 3 หน้าโดยใช้ BottomNavigationBar
+
+--- 2.9 แนวคำตอบแบบฝึกหัด ---
+
+1. Container vs SizedBox vs Padding:
+   - Container: เป็น Widget อเนกประสงค์ที่มีคุณสมบัติมากมาย เช่น decoration (สี, ขอบ), margin, padding, การจัดตำแหน่ง
+   - SizedBox: เป็น Widget ที่เน้นการกำหนดขนาดที่แน่นอนให้กับ child หรือสร้างช่องว่างในแนวตั้งหรือแนวนอน มีเพียงคุณสมบัติ width และ height
+   - Padding: เป็น Widget ที่เน้นการเพิ่มระยะห่างรอบ child เท่านั้น ง่ายต่อการอ่านและมีประสิทธิภาพมากกว่าการใช้ Container ที่กำหนดเฉพาะ padding
+
+2. ตัวอย่างการใช้ Row และ Column:
+```dart
+Card(
+  child: Padding(
+    padding: EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('ชื่อสินค้า', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+        SizedBox(height: 8),
+        Row(
+          children: [
+            Image.asset('assets/product.jpg', width: 80, height: 80),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('รายละเอียดสินค้า...'),
+                  SizedBox(height: 8),
+                  Text('฿1,500', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+                ],
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.star, color: Colors.amber),
+                Text('4.8 (120 รีวิว)'),
+              ],
+            ),
+            ElevatedButton(
+              onPressed: () {},
+              child: Text('ซื้อเลย'),
+            ),
+          ],
+        ),
+      ],
+    ),
+  ),
+)
+```
+
+3. StatelessWidget vs StatefulWidget:
+   - StatelessWidget ควรใช้เมื่อ Widget ไม่มีการเปลี่ยนแปลงสถานะภายใน เช่น:
+     * แสดงข้อความหรือรูปภาพที่ไม่เปลี่ยนแปลง
+     * แสดงข้อมูลที่ส่งมาจาก parent widget
+     * ปุ่มที่เพียงแค่ส่งการกระทำกลับไปยัง parent widget
+   - StatefulWidget ควรใช้เมื่อ Widget ต้องการเก็บและเปลี่ยนแปลงสถานะภายใน เช่น:
+     * แบบฟอร์มที่ต้องเก็บค่าที่ผู้ใช้ป้อน
+     * ตัวนับหรือตัวชี้วัดความคืบหน้า
+     * หน้าจอที่แสดงข้อมูลแบบ realtime หรือต้องโหลดข้อมูลเมื่อเปิด
+
+4. คำสั่ง `setState(() { ... })`:
+   - เป็นวิธีที่ Flutter ใช้ในการแจ้งเตือนระบบว่ามีการเปลี่ยนแปลงสถานะภายใน StatefulWidget
+   - เมื่อเรียก setState(), Flutter จะทำการ rebuild ส่วนของ UI ที่ได้รับผลกระทบ
+   - โค้ดใน callback function ของ setState() คือการเปลี่ยนแปลงตัวแปรหรือสถานะที่จะส่งผลต่อการแสดงผล UI
+   - หากไม่ใช้ setState() แต่เปลี่ยนค่าตัวแปรโดยตรง UI จะไม่อัพเดตเพราะ Flutter ไม่รู้ว่ามีการเปลี่ยนแปลงเกิดขึ้น
+
+5. ตัวอย่างโค้ดแอพที่มี 3 หน้าจอด้วย BottomNavigationBar:
+```dart
+class MainApp extends StatefulWidget {
+  @override
+  _MainAppState createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
+  int _selectedIndex = 0;
+  
+  final List<Widget> _screens = [
+    HomeScreen(),
+    SearchScreen(),
+    ProfileScreen(),
+  ];
+  
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'หน้าหลัก',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'ค้นหา',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'โปรไฟล์',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+      ),
+    );
+  }
+}
+
+class HomeScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('หน้าหลัก'),
+    );
+  }
+}
+
+class SearchScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('หน้าค้นหา'),
+    );
+  }
+}
+
+class ProfileScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Text('หน้าโปรไฟล์'),
+    );
+  }
+}
+``` 

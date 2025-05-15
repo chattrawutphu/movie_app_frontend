@@ -1,0 +1,482 @@
+===== บทที่ 4: การเชื่อมต่อกับ API ใน Flutter =====
+
+การพัฒนาแอพพลิเคชันสมัยใหม่มักต้องมีการเชื่อมต่อกับ API เพื่อรับส่งข้อมูลกับเซิร์ฟเวอร์ ในบทเรียนนี้เราจะเรียนรู้การใช้ Flutter เชื่อมต่อกับ API
+
+--- 4.1 การทำความเข้าใจ HTTP และ RESTful API ---
+
+HTTP (Hypertext Transfer Protocol) เป็นโปรโตคอลพื้นฐานที่ใช้ในการสื่อสารบนอินเทอร์เน็ต ส่วน RESTful API คือรูปแบบการออกแบบ API ที่ใช้ HTTP methods
+
+HTTP Methods หลักๆ:
+- GET: ดึงข้อมูล
+- POST: สร้างข้อมูลใหม่
+- PUT/PATCH: อัพเดทข้อมูล
+- DELETE: ลบข้อมูล
+
+รูปแบบข้อมูลที่นิยมใช้:
+- JSON (JavaScript Object Notation): รูปแบบที่นิยมมากที่สุด
+- XML: รูปแบบเก่าที่ใช้น้อยลง
+- Form Data: สำหรับการอัพโหลดไฟล์
+
+--- 4.2 การใช้ package http ---
+
+Package http เป็น package พื้นฐานที่ใช้ในการเชื่อมต่อกับ API
+
+1. เพิ่ม dependency ในไฟล์ pubspec.yaml:
+```yaml
+dependencies:
+  http: ^0.13.4
+```
+
+2. การใช้งานพื้นฐาน:
+
+```dart
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
+// GET Request
+Future<void> fetchData() async {
+  final response = await http.get(Uri.parse('https://api.example.com/data'));
+  
+  if (response.statusCode == 200) {
+    // แปลง JSON เป็น Dart object
+    final data = jsonDecode(response.body);
+    print(data);
+  } else {
+    throw Exception('เกิดข้อผิดพลาดในการโหลดข้อมูล: ${response.statusCode}');
+  }
+}
+
+// POST Request
+Future<void> createData() async {
+  final response = await http.post(
+    Uri.parse('https://api.example.com/data'),
+    headers: {
+      'Content-Type': 'application/json; charset=UTF-8',
+    },
+    body: jsonEncode({
+      'title': 'ชื่อรายการ',
+      'body': 'เนื้อหารายการ',
+      'userId': 1,
+    }),
+  );
+  
+  if (response.statusCode == 201) {
+    final data = jsonDecode(response.body);
+    print('สร้างข้อมูลสำเร็จ: $data');
+  } else {
+    throw Exception('เกิดข้อผิดพลาดในการสร้างข้อมูล: ${response.statusCode}');
+  }
+}
+```
+
+3. การจัดการกับ Headers และการส่ง Token:
+
+```dart
+Future<void> fetchProtectedData() async {
+  final response = await http.get(
+    Uri.parse('https://api.example.com/protected'),
+    headers: {
+      'Authorization': 'Bearer YOUR_TOKEN_HERE',
+      'Content-Type': 'application/json',
+    },
+  );
+  
+  // จัดการกับ response
+}
+```
+
+--- 4.3 การสร้าง Model classes ---
+
+การแปลงข้อมูล JSON เป็นคลาส Dart ช่วยให้ทำงานกับข้อมูลได้สะดวกขึ้น:
+
+1. สร้าง Model class:
+
+```dart
+class User {
+  final int id;
+  final String name;
+  final String email;
+  
+  User({
+    required this.id,
+    required this.name,
+    required this.email,
+  });
+  
+  // Factory constructor สำหรับแปลง JSON
+  factory User.fromJson(Map<String, dynamic> json) {
+    return User(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
+    );
+  }
+  
+  // Method สำหรับแปลงเป็น JSON
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+    };
+  }
+}
+```
+
+2. การใช้งาน Model กับ API:
+
+```dart
+Future<List<User>> fetchUsers() async {
+  final response = await http.get(Uri.parse('https://api.example.com/users'));
+  
+  if (response.statusCode == 200) {
+    final List<dynamic> usersJson = jsonDecode(response.body);
+    return usersJson.map((json) => User.fromJson(json)).toList();
+  } else {
+    throw Exception('เกิดข้อผิดพลาดในการโหลดข้อมูลผู้ใช้');
+  }
+}
+```
+
+--- 4.4 การจัดการ Asynchronous Programming ---
+
+Flutter ใช้ Dart ซึ่งมีการจัดการ asynchronous programming ด้วย Future และ async/await
+
+```dart
+// การใช้ async/await
+Future<void> fetchUserData() async {
+  try {
+    // แสดง loading
+    setState(() {
+      isLoading = true;
+    });
+    
+    // เรียกใช้ API
+    final users = await fetchUsers();
+    
+    // อัพเดต UI
+    setState(() {
+      this.users = users;
+      isLoading = false;
+    });
+  } catch (e) {
+    // จัดการข้อผิดพลาด
+    setState(() {
+      error = e.toString();
+      isLoading = false;
+    });
+  }
+}
+
+// การใช้ร่วมกับ FutureBuilder
+Widget build(BuildContext context) {
+  return FutureBuilder<List<User>>(
+    future: fetchUsers(),
+    builder: (context, snapshot) {
+      if (snapshot.hasData) {
+        return ListView.builder(
+          itemCount: snapshot.data!.length,
+          itemBuilder: (context, index) {
+            return ListTile(
+              title: Text(snapshot.data![index].name),
+              subtitle: Text(snapshot.data![index].email),
+            );
+          },
+        );
+      } else if (snapshot.hasError) {
+        return Center(child: Text('เกิดข้อผิดพลาด: ${snapshot.error}'));
+      }
+      
+      // แสดง loading
+      return Center(child: CircularProgressIndicator());
+    },
+  );
+}
+```
+
+--- 4.5 การใช้ Dio package ---
+
+Dio เป็น package ที่มีความสามารถมากกว่า http พื้นฐาน เหมาะสำหรับโปรเจคขนาดใหญ่:
+
+1. เพิ่ม dependency:
+```yaml
+dependencies:
+  dio: ^4.0.6
+```
+
+2. การใช้งานพื้นฐาน:
+
+```dart
+import 'package:dio/dio.dart';
+
+final dio = Dio();
+
+Future<void> fetchDataWithDio() async {
+  try {
+    final response = await dio.get('https://api.example.com/data');
+    print(response.data); // ข้อมูลถูกแปลงเป็น Dart object อัตโนมัติ
+  } catch (e) {
+    if (e is DioError) {
+      print('Dio error: ${e.message}');
+      if (e.response != null) {
+        print('Status code: ${e.response?.statusCode}');
+        print('Response data: ${e.response?.data}');
+      }
+    } else {
+      print('Unexpected error: $e');
+    }
+  }
+}
+```
+
+3. การกำหนดค่า Global Configuration:
+
+```dart
+final dio = Dio(BaseOptions(
+  baseUrl: 'https://api.example.com',
+  connectTimeout: 5000, // 5 วินาที
+  receiveTimeout: 3000, // 3 วินาที
+  headers: {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  },
+));
+
+// เพิ่ม interceptor สำหรับ authentication
+dio.interceptors.add(InterceptorsWrapper(
+  onRequest: (options, handler) {
+    // เพิ่ม token ใน header ทุกครั้งที่มีการเรียก API
+    options.headers['Authorization'] = 'Bearer $token';
+    return handler.next(options);
+  },
+  onResponse: (response, handler) {
+    // สามารถจัดการกับ response ก่อนส่งต่อ
+    return handler.next(response);
+  },
+  onError: (DioError e, handler) {
+    // จัดการข้อผิดพลาด เช่น refresh token เมื่อ token หมดอายุ
+    if (e.response?.statusCode == 401) {
+      // refresh token logic
+    }
+    return handler.next(e);
+  },
+));
+```
+
+--- 4.6 การสร้าง API Service ---
+
+การสร้าง API Service ช่วยจัดระเบียบโค้ดและทำให้การเรียกใช้ API เป็นระบบมากขึ้น:
+
+```dart
+class ApiService {
+  final Dio _dio = Dio(BaseOptions(
+    baseUrl: 'https://api.example.com',
+    connectTimeout: 5000,
+    receiveTimeout: 3000,
+  ));
+  
+  ApiService() {
+    _dio.interceptors.add(LogInterceptor(responseBody: true));
+  }
+  
+  Future<List<User>> getUsers() async {
+    try {
+      final response = await _dio.get('/users');
+      final List<dynamic> data = response.data;
+      return data.map((json) => User.fromJson(json)).toList();
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+  
+  Future<User> getUserById(int id) async {
+    try {
+      final response = await _dio.get('/users/$id');
+      return User.fromJson(response.data);
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+  
+  Future<User> createUser(User user) async {
+    try {
+      final response = await _dio.post(
+        '/users',
+        data: user.toJson(),
+      );
+      return User.fromJson(response.data);
+    } catch (e) {
+      throw _handleError(e);
+    }
+  }
+  
+  Exception _handleError(dynamic error) {
+    if (error is DioError) {
+      if (error.response != null) {
+        return Exception('เกิดข้อผิดพลาด: ${error.response!.statusCode} - ${error.response!.statusMessage}');
+      } else {
+        return Exception('เกิดข้อผิดพลาดในการเชื่อมต่อ: ${error.message}');
+      }
+    }
+    return Exception('เกิดข้อผิดพลาดที่ไม่ทราบสาเหตุ');
+  }
+}
+```
+
+--- 4.7 การจัดการการอัพโหลดไฟล์ ---
+
+การอัพโหลดไฟล์เป็นส่วนสำคัญในหลายแอพพลิเคชัน:
+
+```dart
+Future<void> uploadFile(File file) async {
+  try {
+    String fileName = file.path.split('/').last;
+    
+    FormData formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(
+        file.path,
+        filename: fileName,
+      ),
+      'type': 'image',
+      'description': 'อัพโหลดรูปภาพจากแอพ',
+    });
+    
+    final response = await dio.post(
+      'https://api.example.com/upload',
+      data: formData,
+      onSendProgress: (sent, total) {
+        print('${(sent / total * 100).toStringAsFixed(0)}%');
+      },
+    );
+    
+    print('อัพโหลดสำเร็จ: ${response.data}');
+  } catch (e) {
+    print('เกิดข้อผิดพลาดในการอัพโหลด: $e');
+  }
+}
+```
+
+--- 4.8 แบบฝึกหัด ---
+
+1. HTTP method ใดที่ใช้สำหรับการดึงข้อมูลและการสร้างข้อมูลใหม่?
+2. จงเขียนโค้ดสำหรับการเรียกข้อมูลจาก API และแสดงผลใน ListView
+3. เปรียบเทียบข้อดีข้อเสียระหว่าง http package และ dio package
+4. จงอธิบายความสำคัญของการใช้ Model classes ในการทำงานกับ API
+5. เมื่อเกิดข้อผิดพลาดในการเรียก API เราควรจัดการอย่างไร?
+
+--- 4.9 แนวคำตอบแบบฝึกหัด ---
+
+1. HTTP method:
+   - GET: ใช้สำหรับการดึงข้อมูล (อ่านข้อมูล)
+   - POST: ใช้สำหรับการสร้างข้อมูลใหม่
+
+2. โค้ดสำหรับการเรียกข้อมูลจาก API และแสดงผลใน ListView:
+```dart
+class ProductList extends StatefulWidget {
+  @override
+  _ProductListState createState() => _ProductListState();
+}
+
+class _ProductListState extends State<ProductList> {
+  late Future<List<Product>> futureProducts;
+  
+  @override
+  void initState() {
+    super.initState();
+    futureProducts = fetchProducts();
+  }
+  
+  Future<List<Product>> fetchProducts() async {
+    final response = await http.get(Uri.parse('https://api.example.com/products'));
+    
+    if (response.statusCode == 200) {
+      List<dynamic> data = jsonDecode(response.body);
+      return data.map((json) => Product.fromJson(json)).toList();
+    } else {
+      throw Exception('เกิดข้อผิดพลาดในการโหลดข้อมูลสินค้า');
+    }
+  }
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('รายการสินค้า')),
+      body: FutureBuilder<List<Product>>(
+        future: futureProducts,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(child: CircularProgressIndicator());
+          } else if (snapshot.hasError) {
+            return Center(child: Text('เกิดข้อผิดพลาด: ${snapshot.error}'));
+          } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return Center(child: Text('ไม่พบข้อมูลสินค้า'));
+          } else {
+            return ListView.builder(
+              itemCount: snapshot.data!.length,
+              itemBuilder: (context, index) {
+                Product product = snapshot.data![index];
+                return ListTile(
+                  leading: product.imageUrl != null
+                    ? Image.network(product.imageUrl!, width: 50, height: 50)
+                    : Icon(Icons.image),
+                  title: Text(product.name),
+                  subtitle: Text('฿${product.price}'),
+                  onTap: () {
+                    // แสดงรายละเอียดสินค้า
+                  },
+                );
+              },
+            );
+          }
+        },
+      ),
+    );
+  }
+}
+
+class Product {
+  final int id;
+  final String name;
+  final double price;
+  final String? imageUrl;
+  
+  Product({
+    required this.id,
+    required this.name,
+    required this.price,
+    this.imageUrl,
+  });
+  
+  factory Product.fromJson(Map<String, dynamic> json) {
+    return Product(
+      id: json['id'],
+      name: json['name'],
+      price: json['price'].toDouble(),
+      imageUrl: json['image_url'],
+    );
+  }
+}
+```
+
+3. http vs dio:
+   - http:
+     * ข้อดี: เป็น package พื้นฐาน, น้ำหนักเบา, ง่ายต่อการเรียนรู้
+     * ข้อเสีย: ฟีเจอร์จำกัด, ไม่มี interceptors, ไม่รองรับการแปลง JSON อัตโนมัติ
+   - dio:
+     * ข้อดี: มีฟีเจอร์ครบครัน, มี interceptors, รองรับ request cancellation, แปลง JSON อัตโนมัติ, การอัพโหลดไฟล์ที่ดีกว่า
+     * ข้อเสีย: มีขนาดใหญ่กว่า, มีความซับซ้อนมากกว่า
+
+4. ความสำคัญของ Model classes:
+   - ทำให้โค้ดอ่านง่ายและเป็นระเบียบมากขึ้น
+   - เพิ่มความปลอดภัยด้วย type safety (ลดข้อผิดพลาดจากการเข้าถึง field ที่ไม่มีอยู่)
+   - ง่ายต่อการเพิ่มเมธอดหรือตรรกะเฉพาะสำหรับข้อมูลนั้นๆ
+   - ช่วยในการจัดการการแปลงข้อมูลระหว่าง JSON และ Dart objects
+   - ทำให้ autocomplete ใน IDE ทำงานได้ดีขึ้น
+
+5. การจัดการข้อผิดพลาดในการเรียก API:
+   - ใช้ try-catch blocks เพื่อจับข้อผิดพลาดและป้องกันแอพล่ม
+   - แยกประเภทข้อผิดพลาด (เช่น การเชื่อมต่อเครือข่าย, server error, client error)
+   - แสดงข้อความที่เป็นประโยชน์ต่อผู้ใช้ (แต่ไม่เปิดเผยรายละเอียดทางเทคนิคมากเกินไป)
+   - มีกลไกการลองใหม่หากเหมาะสม
+   - ล็อกข้อผิดพลาดเพื่อการวิเคราะห์ปัญหา
+   - มีหน้าจอ UI ที่เหมาะสมสำหรับสถานะข้อผิดพลาด (empty state, error state) 

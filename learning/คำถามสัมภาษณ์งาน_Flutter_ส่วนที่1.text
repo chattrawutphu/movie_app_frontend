@@ -1,0 +1,230 @@
+===== คำถามสัมภาษณ์งาน Flutter: ส่วนที่ 1 (พื้นฐานและ Widget) =====
+
+ในส่วนนี้จะรวบรวมคำถามและคำตอบที่มักพบในการสัมภาษณ์งาน Flutter โดยเน้นที่ความรู้พื้นฐานและ Widget
+
+--- 1. คำถามเกี่ยวกับพื้นฐาน Flutter ---
+
+Q1: Flutter คืออะไร และมีข้อดีอย่างไรเมื่อเทียบกับเครื่องมือพัฒนาแอพอื่นๆ?
+A: Flutter คือ UI toolkit จาก Google ที่ใช้สำหรับสร้างแอพพลิเคชันบนหลายแพลตฟอร์มจากโค้ดชุดเดียว (iOS, Android, Web, Desktop) โดยใช้ภาษา Dart
+   
+   ข้อดีของ Flutter:
+   - Hot Reload: ช่วยให้เห็นผลการเปลี่ยนแปลงโค้ดได้ทันที ช่วยเพิ่มประสิทธิภาพในการพัฒนา
+   - ประสิทธิภาพสูง: ใช้ Skia เป็น rendering engine ทำให้มีประสิทธิภาพใกล้เคียงกับแอพเนทีฟ
+   - Single Codebase: สามารถพัฒนาแอพหลายแพลตฟอร์มจากโค้ดเดียว
+   - Widget ที่สวยงามและปรับแต่งได้: มี widget ให้เลือกมากมายและสามารถปรับแต่งได้ตามต้องการ
+   - ชุมชนที่เติบโตและได้รับการสนับสนุนจาก Google
+
+Q2: Dart คืออะไร และทำไม Flutter ถึงใช้ Dart?
+A: Dart เป็นภาษาโปรแกรมมิ่งที่พัฒนาโดย Google ที่มีลักษณะคล้าย Java, JavaScript และ C#
+   
+   Flutter เลือกใช้ Dart เพราะ:
+   - Just-in-Time (JIT) compilation: สนับสนุน hot reload ระหว่างการพัฒนา
+   - Ahead-of-Time (AOT) compilation: ทำให้แอพทำงานได้เร็วในการใช้งานจริง
+   - Dart มีโครงสร้างที่เรียบง่ายและเรียนรู้ได้ง่าย
+   - สนับสนุนทั้ง OOP และ Functional Programming
+   - มีเครื่องมือจัดการ Asynchronous programming ที่ดี (Future, async/await)
+   - Garbage collection ที่มีประสิทธิภาพ
+
+Q3: อธิบายความแตกต่างระหว่าง Hot Reload และ Hot Restart
+A: - Hot Reload: โหลดโค้ดที่เปลี่ยนแปลงเข้าไปในแอพที่กำลังทำงานโดยไม่ต้องเริ่ม runtime ใหม่ รักษาสถานะ (state) ปัจจุบันไว้ ทำงานได้เร็วมาก (เป็นวินาที)
+   - Hot Restart: เริ่ม runtime ใหม่ทั้งหมดและโหลดโค้ดทั้งหมดอีกครั้ง ทำให้สถานะ (state) ทั้งหมดหายไป ใช้เวลานานกว่า Hot Reload แต่ยังเร็วกว่าการ rebuild แอพใหม่ทั้งหมด
+
+   ควรใช้ Hot Reload เมื่อทำการเปลี่ยนแปลงเล็กๆ น้อยๆ และใช้ Hot Restart เมื่อมีการเปลี่ยนแปลงโครงสร้างหรือ state ที่สำคัญ
+
+Q4: อธิบายวงจรชีวิต (Lifecycle) ของ Flutter App
+A: วงจรชีวิตหลักของ Flutter App:
+   1. createState(): เรียกเมื่อ widget ถูกสร้าง
+   2. initState(): เรียกเมื่อ State object ถูกสร้าง ใช้สำหรับการตั้งค่าเริ่มต้น
+   3. didChangeDependencies(): เรียกหลัง initState() และเมื่อ dependencies เปลี่ยนแปลง
+   4. build(): สร้าง UI ของ widget จะเรียกทุกครั้งที่ UI ต้องอัพเดต
+   5. didUpdateWidget(): เรียกเมื่อ widget configuration เปลี่ยนแปลง
+   6. setState(): เรียกเมื่อต้องการอัพเดต UI
+   7. deactivate(): เรียกเมื่อ widget ถูกนำออกจาก widget tree ชั่วคราว
+   8. dispose(): เรียกเมื่อ State object ถูกลบถาวร ใช้สำหรับ cleanup resources
+
+Q5: อะไรคือ pubspec.yaml และมีหน้าที่อะไร?
+A: pubspec.yaml เป็นไฟล์กำหนดค่าสำคัญในโปรเจค Flutter ที่:
+   - กำหนดชื่อและรายละเอียดของโปรเจค
+   - ระบุ dependencies ที่โปรเจคต้องการ
+   - กำหนด SDK version ที่รองรับ
+   - กำหนด assets (รูปภาพ, ฟอนต์, ฯลฯ) ที่แอพใช้
+   - กำหนดค่า Flutter-specific configuration เช่น การรองรับแพลตฟอร์มต่างๆ
+
+Q6: อธิบายวิธีการเพิ่ม assets (รูปภาพ, ฟอนต์) ในโปรเจค Flutter
+A: 1. สร้างโฟลเดอร์ assets/ (หรือ assets/images/, assets/fonts/ ฯลฯ) ในรูทของโปรเจค
+   2. นำไฟล์ assets ไปไว้ในโฟลเดอร์
+   3. แก้ไขไฟล์ pubspec.yaml เพื่อระบุ path ของ assets:
+      ```yaml
+      flutter:
+        assets:
+          - assets/images/
+          - assets/data/
+        fonts:
+          - family: MyFont
+            fonts:
+              - asset: assets/fonts/MyFont-Regular.ttf
+              - asset: assets/fonts/MyFont-Bold.ttf
+                weight: 700
+      ```
+   4. รัน `flutter pub get` เพื่ออัพเดต dependencies
+   5. ใช้งาน assets ในโค้ด:
+      ```dart
+      // สำหรับรูปภาพ
+      Image.asset('assets/images/logo.png')
+      
+      // สำหรับฟอนต์ (กำหนดในไฟล์ ThemeData หรือ TextStyle)
+      TextStyle(fontFamily: 'MyFont')
+      ```
+
+--- 2. คำถามเกี่ยวกับ Widget ---
+
+Q7: อธิบายความแตกต่างระหว่าง StatelessWidget และ StatefulWidget
+A: - StatelessWidget: เป็น widget ที่ไม่มีการเปลี่ยนแปลงสถานะภายใน เมื่อสร้างแล้วไม่สามารถเปลี่ยนแปลงได้ เหมาะสำหรับ UI ที่ไม่เปลี่ยนแปลงบ่อย เช่น ไอคอน, ข้อความคงที่
+   - StatefulWidget: เป็น widget ที่สามารถเปลี่ยนแปลงสถานะภายในได้ เช่น เมื่อมีการโต้ตอบกับผู้ใช้ โดยใช้เมธอด setState() เพื่ออัพเดต UI เหมาะสำหรับ UI ที่มีการเปลี่ยนแปลง เช่น ฟอร์ม, เกม
+
+   StatefulWidget ประกอบด้วย 2 คลาส: คลาส Widget (immutable) และคลาส State (mutable) ที่เก็บข้อมูลและตรรกะการทำงาน
+
+Q8: คำว่า "Everything is a Widget" ในบริบทของ Flutter หมายถึงอะไร?
+A: "Everything is a Widget" หมายถึงแนวคิดหลักของ Flutter ที่ทุกส่วนของ UI ถูกสร้างขึ้นจาก widgets ไม่ว่าจะเป็นปุ่ม, ข้อความ, การจัดวาง (layouts), animations, gestures หรือแม้แต่แอพทั้งหมด (MaterialApp)
+   
+   Flutter สร้าง UI ด้วยการประกอบ widgets เล็กๆ เข้าด้วยกันเป็นโครงสร้างต้นไม้ (Widget Tree) ทำให้สามารถสร้าง UI ที่ซับซ้อนได้อย่างมีประสิทธิภาพและปรับแต่งได้ง่าย
+
+Q9: อธิบายความแตกต่างระหว่าง Container, SizedBox, และ Padding
+A: - Container: เป็น widget อเนกประสงค์ที่มีคุณสมบัติหลากหลาย ทั้ง padding, margin, decoration (สี, ขอบ, เงา), constraints, alignment ฯลฯ
+   - SizedBox: เป็น widget ที่ใช้กำหนดขนาดที่แน่นอน (width, height) ให้กับ child หรือสร้างช่องว่างขนาดคงที่ มีประสิทธิภาพมากกว่า Container เพราะมีคุณสมบัติน้อยกว่า
+   - Padding: เป็น widget เฉพาะทางที่ใช้เพิ่มระยะห่างรอบ child เท่านั้น เหมาะสำหรับการเพิ่ม padding โดยเฉพาะ
+
+   ควรเลือกใช้ SizedBox หรือ Padding แทน Container เมื่อต้องการใช้เฉพาะคุณสมบัติขนาดหรือ padding เพื่อประสิทธิภาพที่ดีกว่า
+
+Q10: อธิบายวิธีการจัดเรียง layout ใน Flutter ด้วย Row, Column และ Flex
+A: - Row: จัดเรียง widgets ในแนวนอน (horizontal)
+   - Column: จัดเรียง widgets ในแนวตั้ง (vertical)
+   - Flex: เป็น widget พื้นฐานที่ Row และ Column ต่างก็ extends มา ให้ความยืดหยุ่นในการกำหนดทิศทาง
+   
+   การควบคุมการจัดวางใน Row และ Column:
+   - mainAxisAlignment: ควบคุมการจัดวางตามแกนหลัก (horizontal สำหรับ Row, vertical สำหรับ Column)
+   - crossAxisAlignment: ควบคุมการจัดวางตามแกนขวาง (vertical สำหรับ Row, horizontal สำหรับ Column)
+   - mainAxisSize: กำหนดขนาดตามแกนหลัก (max หรือ min)
+   
+   Widget สำคัญที่ใช้ร่วมกับ Row และ Column:
+   - Expanded: ขยาย widget ให้ใช้พื้นที่ที่เหลือตามแกนหลัก
+   - Flexible: คล้าย Expanded แต่สามารถกำหนดสัดส่วนการขยายได้ด้วย flex factor
+   - Spacer: สร้างช่องว่างที่ยืดหยุ่นระหว่าง widgets
+
+Q11: อธิบายความแตกต่างระหว่าง FutureBuilder และ StreamBuilder
+A: ทั้ง FutureBuilder และ StreamBuilder เป็น widgets ที่ช่วยจัดการกับข้อมูล asynchronous แต่มีความแตกต่างดังนี้:
+   
+   - FutureBuilder:
+     * ใช้กับ Future ซึ่งให้ผลลัพธ์เพียงครั้งเดียว (one-time operation)
+     * เหมาะสำหรับการดึงข้อมูลครั้งเดียว เช่น การเรียก API เพื่อโหลดข้อมูลเริ่มต้น
+     * มีสถานะ connectionState เป็น none, waiting, active, done
+   
+   - StreamBuilder:
+     * ใช้กับ Stream ซึ่งให้ผลลัพธ์ต่อเนื่องหลายครั้ง (continuous updates)
+     * เหมาะสำหรับข้อมูลที่เปลี่ยนแปลงตลอดเวลา เช่น ข้อมูล realtime, การอัพเดตต่อเนื่อง
+     * อัพเดต UI โดยอัตโนมัติเมื่อ Stream ส่งข้อมูลใหม่
+
+   ทั้งสองมี builder function ที่คล้ายกันที่รับ BuildContext และ AsyncSnapshot ซึ่งมีข้อมูลเกี่ยวกับ connectionState, data, และ error
+
+Q12: เมื่อไหร่ควรใช้ ListView และเมื่อไหร่ควรใช้ GridView?
+A: - ListView:
+     * เหมาะสำหรับแสดงข้อมูลในรูปแบบรายการแนวตั้งหรือแนวนอน
+     * ใช้เมื่อต้องการแสดงรายการที่มีความยาวไม่จำกัด
+     * เหมาะกับข้อมูลที่ควรแสดงเป็นแถวเดียว เช่น รายการแชท, ฟีดข่าว, เมนูการตั้งค่า
+   
+   - GridView:
+     * เหมาะสำหรับแสดงข้อมูลในรูปแบบตาราง (grid) ทั้งแนวตั้งและแนวนอน
+     * ใช้เมื่อต้องการแสดงรายการเป็นแถวและคอลัมน์
+     * เหมาะกับข้อมูลที่มีลักษณะคล้ายกันและควรแสดงพร้อมกันหลายรายการ เช่น แกลเลอรีรูปภาพ, แคตตาล็อกสินค้า
+   
+   สำหรับข้อมูลจำนวนมาก ควรใช้ ListView.builder หรือ GridView.builder เพื่อประสิทธิภาพที่ดีกว่า เนื่องจากสร้าง items เฉพาะที่ปรากฏบนหน้าจอเท่านั้น
+
+Q13: อธิบายวิธีการจัดการ Navigation ใน Flutter
+A: Flutter มีหลายวิธีในการจัดการ Navigation:
+
+   1. Navigator 1.0 (เดิม):
+      ```dart
+      // การนำทางไปยังหน้าใหม่
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => SecondScreen()),
+      );
+      
+      // การย้อนกลับ
+      Navigator.pop(context);
+      
+      // การแทนที่หน้าปัจจุบัน (ไม่สามารถย้อนกลับได้)
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => NewScreen()),
+      );
+      
+      // การนำทางไปยังหน้าใหม่และลบทุกหน้าก่อนหน้า
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => HomeScreen()),
+        (Route<dynamic> route) => false,
+      );
+      ```
+   
+   2. Navigator 2.0 (ใหม่):
+      - ใช้ Router และ RouteInformationParser
+      - รองรับ deep linking และ web URLs
+      - มีการจัดการ state สำหรับการนำทางที่ซับซ้อนมากขึ้น
+   
+   3. Packages เพิ่มเติม:
+      - get: ให้ syntax ที่ง่ายกว่าสำหรับการนำทาง
+      - auto_route: สร้างโค้ดสำหรับการนำทางโดยใช้ code generation
+      - go_router: package จาก Flutter team ที่รองรับ Navigator 2.0 แต่ใช้งานง่ายกว่า
+
+Q14: Scaffold คืออะไรและประกอบด้วยอะไรบ้าง?
+A: Scaffold เป็น widget ที่ใช้สร้างโครงสร้างพื้นฐานของหน้าจอตาม Material Design ซึ่งประกอบด้วยส่วนประกอบหลักดังนี้:
+   
+   - appBar: แถบด้านบนของหน้าจอ (AppBar)
+   - body: เนื้อหาหลักของหน้าจอ
+   - floatingActionButton: ปุ่มลอยด้านล่างขวา
+   - drawer: เมนูแบบเลื่อนออกมาจากด้านซ้าย
+   - endDrawer: เมนูแบบเลื่อนออกมาจากด้านขวา
+   - bottomNavigationBar: แถบนำทางด้านล่าง
+   - bottomSheet: แผงด้านล่างที่แสดงข้อมูลเพิ่มเติม
+   - backgroundColor: สีพื้นหลังของหน้าจอ
+   - resizeToAvoidBottomInset: ควบคุมการปรับขนาดเมื่อคีย์บอร์ดปรากฏ
+   
+   Scaffold ทำให้การสร้างหน้าจอที่สอดคล้องกับ Material Design เป็นเรื่องง่าย โดยจัดการส่วนประกอบหลักและความสัมพันธ์ระหว่างส่วนประกอบเหล่านั้นให้อัตโนมัติ
+
+Q15: อธิบายการทำงานของ MediaQuery และการใช้งาน
+A: MediaQuery เป็นวิธีการในการรับข้อมูลเกี่ยวกับขนาดและการกำหนดค่าของจอแสดงผล ใช้เพื่อสร้าง responsive UI ที่ปรับตามขนาดหน้าจอ:
+
+   ```dart
+   // เข้าถึงข้อมูล MediaQuery
+   final mediaQuery = MediaQuery.of(context);
+   
+   // ขนาดหน้าจอ
+   final screenWidth = mediaQuery.size.width;
+   final screenHeight = mediaQuery.size.height;
+   
+   // ความหนาแน่นของพิกเซล
+   final pixelRatio = mediaQuery.devicePixelRatio;
+   
+   // พื้นที่ที่ถูกบล็อกโดย system UI
+   final padding = mediaQuery.padding;
+   final safeAreaTop = padding.top; // พื้นที่ status bar
+   final safeAreaBottom = padding.bottom; // พื้นที่ navigation bar
+   
+   // โหมดการแสดงผล
+   final brightness = mediaQuery.platformBrightness; // light or dark
+   
+   // ปรับ UI ตามขนาดหน้าจอ
+   Widget buildResponsiveUI() {
+     if (screenWidth < 600) {
+       return MobileLayout();
+     } else if (screenWidth < 1200) {
+       return TabletLayout();
+     } else {
+       return DesktopLayout();
+     }
+   }
+   ```
+   
+   MediaQuery มีประโยชน์มากในการสร้าง UI ที่ปรับตัวได้ตามขนาดหน้าจอและลักษณะของอุปกรณ์ ไม่ว่าจะเป็นโทรศัพท์, แท็บเล็ต หรือเดสก์ท็อป
+</rewritten_file> 

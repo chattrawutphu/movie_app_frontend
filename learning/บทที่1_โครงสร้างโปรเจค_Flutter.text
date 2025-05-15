@@ -1,0 +1,206 @@
+===== บทที่ 1: โครงสร้างโปรเจค Flutter =====
+
+สวัสดีครับ/ค่ะ! ในบทเรียนนี้เราจะเรียนรู้เกี่ยวกับโครงสร้างพื้นฐานของโปรเจค Flutter ซึ่งจะช่วยให้คุณเข้าใจการทำงานของ Flutter App ได้ดียิ่งขึ้น
+
+--- 1.1 โครงสร้างโปรเจค Flutter โดยทั่วไป ---
+
+เมื่อคุณสร้างโปรเจค Flutter ใหม่ จะมีโครงสร้างไฟล์และโฟลเดอร์พื้นฐานดังนี้:
+
+/android            - โค้ดเฉพาะสำหรับแพลตฟอร์ม Android
+/ios                - โค้ดเฉพาะสำหรับแพลตฟอร์ม iOS
+/lib                - โค้ด Dart หลักของแอพพลิเคชัน (ส่วนใหญ่คุณจะทำงานในโฟลเดอร์นี้)
+/test               - โค้ดสำหรับทดสอบแอพพลิเคชัน
+/web                - โค้ดเฉพาะสำหรับเวอร์ชั่นเว็บ (ถ้ามี)
+/windows            - โค้ดเฉพาะสำหรับ Windows (ถ้ามี)
+/macos              - โค้ดเฉพาะสำหรับ macOS (ถ้ามี)
+/linux              - โค้ดเฉพาะสำหรับ Linux (ถ้ามี)
+/assets             - ไฟล์รูปภาพ, ฟอนต์ และทรัพยากรอื่นๆ
+.gitignore          - กำหนดไฟล์ที่ไม่ต้องการให้ Git ติดตาม
+pubspec.yaml        - กำหนดค่าแอพพลิเคชันและการพึ่งพา packages
+README.md           - เอกสารอธิบายโปรเจค
+analysis_options.yaml - กำหนดค่าการวิเคราะห์โค้ด
+
+--- 1.2 การอธิบายโฟลเดอร์และไฟล์ที่สำคัญ ---
+
+1. โฟลเดอร์ lib/ (สำคัญที่สุด)
+   - นี่คือที่ที่คุณจะเขียนโค้ด Dart เกือบทั้งหมดของแอพพลิเคชัน
+   - ไฟล์ main.dart: จุดเริ่มต้นของทุกแอพ Flutter ซึ่งมีฟังก์ชัน main() และเรียก runApp()
+   - อาจมีการจัดโครงสร้างย่อยตามความต้องการ เช่น:
+     * /lib/screens หรือ /lib/pages - หน้าต่างๆ ของแอพ
+     * /lib/widgets - ส่วนประกอบ UI ที่ใช้ซ้ำ
+     * /lib/models - คลาสที่อธิบายข้อมูล
+     * /lib/services - ตัวจัดการการเชื่อมต่อ API หรือบริการอื่นๆ
+     * /lib/utils หรือ /lib/helpers - ฟังก์ชันสาธารณะ
+     * /lib/constants - ค่าคงที่ต่างๆ
+
+2. pubspec.yaml
+   - ไฟล์นี้กำหนดค่าโปรเจคและการพึ่งพา packages
+   - ระบุชื่อ, คำอธิบาย, เวอร์ชันของแอพ
+   - กำหนด dependencies (packages ที่แอพของคุณต้องการ)
+   - กำหนด assets (รูปภาพ, ฟอนต์, ไฟล์อื่นๆ) ที่ต้องรวมในแอพ
+
+3. android/ และ ios/
+   - โค้ดเฉพาะสำหรับแพลตฟอร์มนั้นๆ
+   - ส่วนใหญ่คุณไม่จำเป็นต้องแก้ไขโค้ดในโฟลเดอร์นี้ เว้นแต่คุณต้องการทำงานเฉพาะแพลตฟอร์ม เช่น การขอสิทธิ์พิเศษ
+
+4. assets/
+   - เก็บทรัพยากรที่ไม่ใช่โค้ด เช่น รูปภาพ, ฟอนต์, JSON
+   - ต้องกำหนดใน pubspec.yaml เพื่อให้สามารถใช้ในแอพได้
+
+--- 1.3 ไฟล์ main.dart: จุดเริ่มต้นของทุกแอพ ---
+
+```dart
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Flutter Demo',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: MyHomePage(title: 'Flutter Demo Home Page'),
+    );
+  }
+}
+
+class MyHomePage extends StatefulWidget {
+  // ...ต่อไป
+}
+```
+
+คำอธิบาย:
+- `main()`: ฟังก์ชันแรกที่ทำงานเมื่อแอพเริ่มต้น
+- `runApp()`: ฟังก์ชันที่รับ Widget และทำให้เป็น root ของแอพ
+- `MaterialApp`: Widget ระดับสูงที่ตั้งค่าพื้นฐานสำหรับแอพที่ใช้ Material Design
+- `StatelessWidget` vs `StatefulWidget`: 
+  * StatelessWidget: Widget ที่ไม่มีการเปลี่ยนแปลงสถานะ (ข้อมูลคงที่)
+  * StatefulWidget: Widget ที่มีการเปลี่ยนแปลงสถานะในระหว่างอายุการใช้งาน
+
+--- 1.4 การจัดการ Dependency ด้วย pubspec.yaml ---
+
+```yaml
+name: movie_app_frontend
+description: A new Flutter project.
+
+publish_to: 'none' # ป้องกันการเผยแพร่โดยไม่ตั้งใจ
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  cupertino_icons: ^1.0.2
+  http: ^0.13.3
+  provider: ^6.0.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^1.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
+  fonts:
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+          weight: 700
+```
+
+คำอธิบาย:
+- `name`: ชื่อแอพพลิเคชัน
+- `dependencies`: packages ที่แอพต้องการสำหรับการทำงาน
+- `dev_dependencies`: packages ที่ใช้เฉพาะตอนพัฒนา
+- `flutter` section: กำหนดค่าเฉพาะสำหรับ Flutter เช่น assets และ fonts
+
+--- 1.5 โครงสร้างโฟลเดอร์ที่แนะนำสำหรับโปรเจคขนาดใหญ่ ---
+
+/lib
+  /api              - API clients และ endpoints
+  /models           - คลาสข้อมูล (data models)
+  /providers        - State management (Provider, Bloc, etc.)
+  /screens          - หน้าต่างๆ ของแอพ
+  /widgets          - Widget ที่ใช้ซ้ำ
+    /common         - Widget ทั่วไปที่ใช้ได้ทั้งแอพ
+    /screen_specific - Widget เฉพาะสำหรับบางหน้า
+  /utils            - ฟังก์ชันและคลาสยูทิลิตี้
+  /constants        - ไฟล์ค่าคงที่ (สี, ขนาด, ข้อความ)
+  /routes           - การจัดการเส้นทางนำทาง
+  /services         - บริการต่างๆ (analytics, local storage, etc.)
+  /localization     - การแปลภาษาและการกำหนดค่าตามท้องถิ่น
+  main.dart         - จุดเริ่มต้นของแอพ
+
+--- 1.6 แนวทางการตั้งชื่อไฟล์ ---
+
+Flutter ใช้การตั้งชื่อแบบ snake_case (ใช้ขีดล่างคั่นระหว่างคำ) สำหรับไฟล์ Dart:
+
+✅ ถูกต้อง:
+- home_screen.dart
+- login_button.dart
+- user_profile_model.dart
+
+❌ ไม่ถูกต้อง:
+- HomeScreen.dart (ใช้ PascalCase)
+- loginButton.dart (ใช้ camelCase)
+- user-profile-model.dart (ใช้ kebab-case)
+
+คลาสต่างๆ ควรใช้ PascalCase (ขึ้นต้นแต่ละคำด้วยตัวพิมพ์ใหญ่):
+- class HomeScreen
+- class LoginButton
+- class UserProfileModel
+
+--- 1.7 แบบฝึกหัด ---
+
+1. จงอธิบายความแตกต่างระหว่าง StatelessWidget และ StatefulWidget
+2. pubspec.yaml มีหน้าที่อะไรในโปรเจค Flutter?
+3. ฟังก์ชัน main() และ runApp() มีความสำคัญอย่างไร?
+4. จงเรียงลำดับการทำงานเมื่อแอพ Flutter เริ่มต้น จากไฟล์ main.dart
+5. ถ้าคุณต้องการเพิ่มรูปภาพในแอพ Flutter คุณต้องทำอย่างไรบ้าง?
+
+--- 1.8 แนวคำตอบแบบฝึกหัด ---
+
+1. StatelessWidget vs StatefulWidget:
+   - StatelessWidget คือ Widget ที่ไม่มีการเปลี่ยนแปลงสถานะภายใน เมื่อสร้างแล้วจะไม่เปลี่ยนแปลง เหมาะสำหรับ UI ที่คงที่
+   - StatefulWidget คือ Widget ที่สามารถเปลี่ยนแปลงสถานะได้ในระหว่างที่แอพทำงาน เช่น การกดปุ่ม, การป้อนข้อมูล
+
+2. pubspec.yaml มีหน้าที่:
+   - กำหนดชื่อและรายละเอียดของแอพ
+   - ระบุเวอร์ชันของ SDK ที่รองรับ
+   - กำหนด dependencies (packages จากภายนอกที่ใช้)
+   - กำหนด assets (รูปภาพ, ฟอนต์, ไฟล์อื่นๆ)
+   - กำหนดค่าต่างๆ สำหรับ Flutter
+
+3. ความสำคัญของ main() และ runApp():
+   - main() เป็นจุดเริ่มต้นของทุกโปรแกรม Dart รวมถึง Flutter
+   - runApp() เป็นฟังก์ชันที่รับ Widget และทำให้เป็น root ของแอพพลิเคชัน
+
+4. ลำดับการทำงานเมื่อแอพ Flutter เริ่มต้น:
+   1. ระบบเรียกฟังก์ชัน main()
+   2. main() เรียก runApp() พร้อม Widget หลัก (เช่น MyApp)
+   3. runApp() กำหนด Widget หลักและเริ่มต้น Flutter framework
+   4. เรียกใช้ build() ของ Root Widget
+   5. สร้าง Widget Tree และเริ่มแสดงผล UI
+
+5. การเพิ่มรูปภาพใน Flutter:
+   1. สร้างโฟลเดอร์ assets/images/ (หรือโครงสร้างตามที่ต้องการ)
+   2. นำรูปภาพไปไว้ในโฟลเดอร์
+   3. แก้ไขไฟล์ pubspec.yaml เพื่อระบุ path ของรูปภาพ:
+      ```yaml
+      flutter:
+        assets:
+          - assets/images/
+      ```
+   4. รัน `flutter pub get` เพื่ออัพเดต dependencies
+   5. ใช้รูปภาพใน Widget โดยใช้ `Image.asset('assets/images/filename.png')` 

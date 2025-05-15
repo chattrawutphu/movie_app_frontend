@@ -1,0 +1,450 @@
+===== บทที่ 3: การจัดการ State ใน Flutter =====
+
+การจัดการ State เป็นหนึ่งในทักษะสำคัญที่สุดสำหรับนักพัฒนา Flutter โดยคำว่า "State" หมายถึงข้อมูลที่อาจเปลี่ยนแปลงระหว่างการทำงานของแอพ
+
+--- 3.1 ประเภทของ State ใน Flutter ---
+
+ใน Flutter แบ่ง State เป็น 2 ประเภทหลัก:
+
+1. **Ephemeral State (Local State)**
+   - เป็น State ที่ใช้เฉพาะใน Widget เดียว
+   - ไม่จำเป็นต้องแบ่งปันกับ Widget อื่น
+   - จัดการได้ง่ายด้วย StatefulWidget และเมธอด setState()
+   - ตัวอย่าง: สถานะการกด Animation, การเปิด/ปิดเมนู, ค่าใน TextField
+
+2. **App State (Shared State)**
+   - เป็น State ที่แบ่งปันระหว่างหลาย Widget
+   - ข้อมูลที่ส่งผลกระทบทั่วทั้งแอพ
+   - ต้องใช้วิธีการจัดการ State แบบเฉพาะ เช่น Provider, Bloc, Redux
+   - ตัวอย่าง: ข้อมูลผู้ใช้, ตะกร้าสินค้า, การตั้งค่าของแอพ
+
+--- 3.2 การจัดการ Local State ด้วย setState() ---
+
+การจัดการ State ระดับพื้นฐานที่สุดใน Flutter คือการใช้ StatefulWidget ร่วมกับเมธอด setState()
+
+```dart
+class CounterWidget extends StatefulWidget {
+  @override
+  _CounterWidgetState createState() => _CounterWidgetState();
+}
+
+class _CounterWidgetState extends State<CounterWidget> {
+  int _counter = 0;
+
+  void _incrementCounter() {
+    setState(() {
+      _counter++;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('จำนวนครั้งที่กด: $_counter'),
+        ElevatedButton(
+          onPressed: _incrementCounter,
+          child: Text('เพิ่ม'),
+        ),
+      ],
+    );
+  }
+}
+```
+
+เมื่อเรียกใช้ `setState()`, Flutter จะทำการ rebuild Widget นั้นและ child ทั้งหมด ทำให้ UI อัพเดตตามค่าที่เปลี่ยนไป
+
+ข้อควรระวัง:
+- เรียกใช้ setState() เฉพาะเมื่อค่า state เปลี่ยนแปลง
+- หลีกเลี่ยงการเรียกใช้ setState() บ่อยเกินไป
+- state ควรถูกเก็บใน State class ไม่ใช่ใน Widget class
+
+--- 3.3 การจัดการ App State ด้วย Provider ---
+
+Provider เป็นวิธีการจัดการ State ที่เรียบง่ายและมีประสิทธิภาพใน Flutter ที่ได้รับการแนะนำโดยทีม Flutter
+
+ขั้นตอนการใช้ Provider:
+
+1. เพิ่ม package ใน pubspec.yaml:
+```yaml
+dependencies:
+  provider: ^6.0.0
+```
+
+2. สร้างคลาส Model ที่ extends ChangeNotifier:
+```dart
+import 'package:flutter/foundation.dart';
+
+class CounterModel extends ChangeNotifier {
+  int _counter = 0;
+
+  int get counter => _counter;
+
+  void increment() {
+    _counter++;
+    notifyListeners();  // แจ้งเตือน widgets ที่ฟังอยู่
+  }
+}
+```
+
+3. ตั้งค่า Provider ที่ root Widget:
+```dart
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CounterModel(),
+      child: MyApp(),
+    ),
+  );
+}
+```
+
+4. ใช้งาน State ใน Widgets:
+```dart
+class CounterText extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // อ่านค่า counter โดยไม่ต้อง rebuild widget เมื่อค่าเปลี่ยน
+    final counterValue = context.watch<CounterModel>().counter;
+    
+    return Text('ค่าปัจจุบัน: $counterValue');
+  }
+}
+
+class IncrementButton extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton(
+      // ใช้เฉพาะเมธอด increment โดยไม่ต้อง rebuild widget
+      onPressed: () => context.read<CounterModel>().increment(),
+      child: Text('เพิ่ม'),
+    );
+  }
+}
+```
+
+รูปแบบการใช้ Provider:
+- **context.watch<T>()**: อ่านค่าและตรวจจับการเปลี่ยนแปลง (ทำให้ rebuild widget เมื่อค่าเปลี่ยน)
+- **context.read<T>()**: อ่านค่าเพียงครั้งเดียว (ไม่ rebuild widget)
+- **Provider.of<T>(context)**: เหมือน watch แต่สามารถกำหนด listen: false เพื่อทำงานเหมือน read
+
+--- 3.4 การจัดการ State ด้วย Bloc Pattern ---
+
+Bloc (Business Logic Component) เป็นรูปแบบการจัดการ State ที่แยกส่วนการทำงานของ UI และ Business Logic ออกจากกันอย่างชัดเจน
+
+ขั้นตอนการใช้ Bloc Pattern (ด้วย flutter_bloc):
+
+1. เพิ่ม package ใน pubspec.yaml:
+```yaml
+dependencies:
+  flutter_bloc: ^8.0.0
+```
+
+2. กำหนด Events:
+```dart
+abstract class CounterEvent {}
+
+class IncrementEvent extends CounterEvent {}
+class DecrementEvent extends CounterEvent {}
+```
+
+3. กำหนด States:
+```dart
+class CounterState {
+  final int counter;
+  
+  CounterState(this.counter);
+}
+```
+
+4. สร้าง Bloc:
+```dart
+class CounterBloc extends Bloc<CounterEvent, CounterState> {
+  CounterBloc() : super(CounterState(0)) {
+    on<IncrementEvent>((event, emit) {
+      emit(CounterState(state.counter + 1));
+    });
+    
+    on<DecrementEvent>((event, emit) {
+      emit(CounterState(state.counter - 1));
+    });
+  }
+}
+```
+
+5. ตั้งค่า Bloc Provider:
+```dart
+void main() {
+  runApp(
+    BlocProvider(
+      create: (context) => CounterBloc(),
+      child: MyApp(),
+    ),
+  );
+}
+```
+
+6. ใช้งาน Bloc ใน Widgets:
+```dart
+class CounterPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Counter App')),
+      body: Center(
+        child: BlocBuilder<CounterBloc, CounterState>(
+          builder: (context, state) {
+            return Text(
+              'ค่าปัจจุบัน: ${state.counter}',
+              style: TextStyle(fontSize: 24),
+            );
+          },
+        ),
+      ),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: () => context.read<CounterBloc>().add(IncrementEvent()),
+            child: Icon(Icons.add),
+          ),
+          SizedBox(height: 8),
+          FloatingActionButton(
+            onPressed: () => context.read<CounterBloc>().add(DecrementEvent()),
+            child: Icon(Icons.remove),
+          ),
+        ],
+      ),
+    );
+  }
+}
+```
+
+ข้อดีของ Bloc Pattern:
+- แยก UI และ Business Logic ออกจากกันอย่างชัดเจน
+- ทดสอบง่าย
+- รองรับการทำงานแบบ Asynchronous
+- สามารถติดตามการเปลี่ยนแปลง State ได้สะดวก
+
+--- 3.5 เปรียบเทียบวิธีการจัดการ State ---
+
+| วิธีการ            | ความซับซ้อน | เหมาะสำหรับ                       | ข้อดี                            | ข้อเสีย                                |
+|-------------------|------------|----------------------------------|--------------------------------|------------------------------------|
+| setState()        | น้อย        | State ใน Widget เดียว            | ง่าย, เป็นส่วนหนึ่งของ Flutter | ไม่เหมาะกับแอพขนาดใหญ่, ส่งต่อ State ยาก |
+| Provider          | ปานกลาง    | แอพขนาดเล็กถึงขนาดกลาง           | เรียบง่าย, ประสิทธิภาพดี       | มีข้อจำกัดในการจัดการ state ซับซ้อน     |
+| Bloc              | มาก        | แอพขนาดกลางถึงขนาดใหญ่           | แยกส่วนชัดเจน, ทดสอบง่าย       | เขียนโค้ดเยอะ, เรียนรู้ยาก              |
+| GetX              | น้อย-ปานกลาง | ต้องการพัฒนาเร็วๆ                | เขียนโค้ดน้อย, ประสิทธิภาพดี    | อาจทำให้โค้ดอ่านยากหากใช้ไม่ถูกวิธี     |
+| Redux             | มาก        | แอพขนาดใหญ่ มี state ซับซ้อน     | คาดเดาพฤติกรรมง่าย             | Boilerplate เยอะ, เรียนรู้ยาก        |
+| MobX              | ปานกลาง    | ต้องการ reactive programming     | โค้ดน้อย, ทำงานแบบ reactive    | ใช้ code generation ซึ่งอาจมีปัญหา    |
+
+--- 3.6 แนวปฏิบัติที่ดีในการจัดการ State ---
+
+1. **เริ่มด้วยสิ่งที่ง่ายที่สุด**
+   - ใช้ setState() สำหรับ State ง่ายๆ ที่ใช้เฉพาะใน Widget เดียว
+   - เลือกใช้เครื่องมือที่ซับซ้อนขึ้นเมื่อจำเป็นเท่านั้น
+
+2. **แบ่งแยก State ตามประเภท**
+   - UI State: ใช้ StatefulWidget หรือ provider อย่างง่าย
+   - Business State: ใช้ Provider หรือ Bloc
+   - Global State: ใช้ Provider ระดับแอพหรือ Bloc
+
+3. **คิดเรื่อง State เป็นแหล่งข้อมูลที่เชื่อถือได้ (Single source of truth)**
+   - แต่ละข้อมูลควรถูกเก็บไว้ที่เดียวและให้ Widget อื่นๆ อ่านจากที่นั่น
+   - หลีกเลี่ยงการทำซ้ำข้อมูลใน State หลายๆ แห่ง
+
+4. **ทำ State เป็น Immutable**
+   - แทนที่จะเปลี่ยนแปลงค่าใน State โดยตรง ให้สร้าง State ใหม่
+   - ช่วยลดข้อผิดพลาดและง่ายต่อการตรวจสอบ
+
+5. **ส่ง State ลงมาแทนที่จะดึงขึ้นไป**
+   - ส่งผ่าน State จาก parent ลงไปยัง child แทนการให้ child เข้าถึง parent โดยตรง
+
+--- 3.7 แบบฝึกหัด ---
+
+1. จงอธิบายความแตกต่างระหว่าง Ephemeral State และ App State
+2. ในกรณีใดบ้างที่ควรใช้ setState() และในกรณีใดที่ควรใช้ Provider?
+3. จงเขียนโค้ดตัวอย่างการใช้ Provider สำหรับแอพตะกร้าสินค้าอย่างง่าย
+4. Bloc Pattern แก้ปัญหาอะไรในการพัฒนาแอพ?
+5. เปรียบเทียบระหว่าง Provider และ Bloc ในแง่ของประสิทธิภาพและความง่ายในการใช้งาน
+
+--- 3.8 แนวคำตอบแบบฝึกหัด ---
+
+1. Ephemeral State vs App State:
+   - Ephemeral State (Local State): เป็น State ที่ใช้เฉพาะใน Widget เดียว ไม่จำเป็นต้องแบ่งปันกับ Widget อื่น เช่น การกด Animation, ค่าใน TextField, สถานะการเปิด/ปิดเมนู
+   - App State (Shared State): เป็น State ที่แบ่งปันระหว่างหลาย Widget ข้อมูลที่ส่งผลกระทบทั่วทั้งแอพ เช่น ข้อมูลผู้ใช้, ตะกร้าสินค้า, การตั้งค่าของแอพ
+
+2. การใช้ setState() vs Provider:
+   - ควรใช้ setState() เมื่อ:
+     * State ใช้เฉพาะใน Widget เดียวหรือ Widget ย่อยใกล้ๆ
+     * การเปลี่ยนแปลงไม่ซับซ้อน
+     * ไม่ต้องเก็บ State ไว้เมื่อ Widget ถูกทำลาย
+   - ควรใช้ Provider เมื่อ:
+     * State ต้องแชร์ระหว่างหลาย Widget ที่ไม่มีความสัมพันธ์แบบ parent-child
+     * ต้องการเก็บ State ไว้แม้ Widget จะถูกทำลาย
+     * มีการเปลี่ยนแปลง State ที่ซับซ้อน เช่น การโหลดข้อมูลจาก API
+
+3. ตัวอย่างโค้ด Provider สำหรับตะกร้าสินค้า:
+```dart
+// สร้างโมเดลสินค้า
+class Product {
+  final String id;
+  final String name;
+  final double price;
+  
+  Product({required this.id, required this.name, required this.price});
+}
+
+// สร้าง CartModel
+class CartModel extends ChangeNotifier {
+  final List<Product> _items = [];
+  
+  List<Product> get items => _items;
+  
+  double get totalPrice => _items.fold(0, (sum, product) => sum + product.price);
+  
+  void addProduct(Product product) {
+    _items.add(product);
+    notifyListeners();
+  }
+  
+  void removeProduct(Product product) {
+    _items.remove(product);
+    notifyListeners();
+  }
+  
+  void clearCart() {
+    _items.clear();
+    notifyListeners();
+  }
+}
+
+// ตั้งค่า Provider
+void main() {
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => CartModel(),
+      child: MyApp(),
+    ),
+  );
+}
+
+// หน้าแสดงสินค้า
+class ProductListScreen extends StatelessWidget {
+  final List<Product> products = [
+    Product(id: '1', name: 'สินค้า A', price: 100),
+    Product(id: '2', name: 'สินค้า B', price: 200),
+    Product(id: '3', name: 'สินค้า C', price: 300),
+  ];
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('รายการสินค้า'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.shopping_cart),
+            onPressed: () => Navigator.push(
+              context, 
+              MaterialPageRoute(builder: (_) => CartScreen())
+            ),
+          ),
+        ],
+      ),
+      body: ListView.builder(
+        itemCount: products.length,
+        itemBuilder: (context, index) {
+          final product = products[index];
+          return ListTile(
+            title: Text(product.name),
+            subtitle: Text('฿${product.price}'),
+            trailing: IconButton(
+              icon: Icon(Icons.add_shopping_cart),
+              onPressed: () {
+                context.read<CartModel>().addProduct(product);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('เพิ่ม ${product.name} ลงตะกร้าแล้ว')),
+                );
+              },
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+// หน้าตะกร้าสินค้า
+class CartScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('ตะกร้าสินค้า')),
+      body: Consumer<CartModel>(
+        builder: (context, cart, child) {
+          if (cart.items.isEmpty) {
+            return Center(child: Text('ตะกร้าว่างเปล่า'));
+          }
+          return Column(
+            children: [
+              Expanded(
+                child: ListView.builder(
+                  itemCount: cart.items.length,
+                  itemBuilder: (context, index) {
+                    final product = cart.items[index];
+                    return ListTile(
+                      title: Text(product.name),
+                      subtitle: Text('฿${product.price}'),
+                      trailing: IconButton(
+                        icon: Icon(Icons.remove_circle),
+                        onPressed: () {
+                          cart.removeProduct(product);
+                        },
+                      ),
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      'รวมทั้งสิ้น: ฿${cart.totalPrice}',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                    ElevatedButton(
+                      onPressed: () {
+                        cart.clearCart();
+                        Navigator.pop(context);
+                      },
+                      child: Text('ชำระเงิน'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+```
+
+4. Bloc Pattern แก้ปัญหาในการพัฒนาแอพดังนี้:
+   - แยก Business Logic ออกจาก UI อย่างชัดเจน ทำให้โค้ดอ่านง่ายและบำรุงรักษาง่าย
+   - รองรับการทำงานแบบ Asynchronous ได้ดี เหมาะกับการเรียก API
+   - ทำให้การทดสอบง่ายขึ้น โดยเฉพาะการทดสอบ Business Logic แยกจาก UI
+   - ช่วยจัดการการไหลของข้อมูลในแอพที่มีความซับซ้อนมาก
+   - สามารถติดตามการเปลี่ยนแปลงและประวัติของ State ได้สะดวก
+
+5. Provider vs Bloc:
+   - ประสิทธิภาพ:
+     * Provider: มีประสิทธิภาพดีสำหรับแอพที่มีความซับซ้อนน้อยถึงปานกลาง ใช้ทรัพยากรน้อยกว่า
+     * Bloc: มีประสิทธิภาพดีสำหรับแอพที่มีความซับซ้อนสูง การแยกส่วนที่ชัดเจนช่วยให้การทำงานมีประสิทธิภาพในระยะยาว
+   - ความง่ายในการใช้งาน:
+     * Provider: เรียนรู้และใช้งานง่ายกว่า มีโค้ด boilerplate น้อย เหมาะสำหรับผู้เริ่มต้น
+     * Bloc: มีความซับซ้อนมากกว่า ต้องเขียนโค้ดมากกว่า มีแนวคิดที่ต้องเรียนรู้เพิ่มเติม เช่น Events, States
+</rewritten_file> 
