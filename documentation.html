@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เอกสารอธิบายการปรับปรุงแอปพลิเคชัน Movie App</title>
+    <style>
+        body {
+            font-family: 'Sarabun', Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        
+        h1, h2, h3 {
+            color: #1976D2;
+        }
+        
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #1976D2;
+        }
+        
+        h2 {
+            margin-top: 30px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .code-comparison {
+            display: flex;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .old-code, .new-code {
+            flex: 1;
+            padding: 15px;
+        }
+        
+        .old-code {
+            background-color: #ffebee;
+            border-right: 1px solid #ddd;
+        }
+        
+        .new-code {
+            background-color: #e8f5e9;
+        }
+        
+        pre {
+            white-space: pre-wrap;
+            background-color: #f5f5f5;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        
+        .highlight {
+            background-color: yellow;
+            padding: 2px;
+        }
+        
+        .feature-card {
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        table, th, td {
+            border: 1px solid #ddd;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: #1976D2;
+            color: white;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>เอกสารอธิบายการปรับปรุงแอปพลิเคชัน Movie App</h1>
+        
+        <section>
+            <h2>บทนำ</h2>
+            <p>เอกสารนี้อธิบายการเปลี่ยนแปลงที่ได้ทำในโค้ดของแอปพลิเคชัน Movie App โดยมีการปรับปรุงหลักๆ ดังนี้:</p>
+            <ul>
+                <li>เปลี่ยนการออกแบบของแอปพลิเคชันให้ใช้ Material Design 3 (Material You)</li>
+                <li>เพิ่มความสามารถในการสลับระหว่างธีมสว่าง (Light Theme) และธีมมืด (Dark Theme)</li>
+                <li>นำไลบรารี VelocityX มาใช้เพื่อให้การเขียนโค้ดมีความกระชับและอ่านง่ายมากขึ้น</li>
+                <li>เพิ่ม UI Components ใหม่ๆ เช่น Carousel, Tabs, Bottom Sheets, Dialogs เป็นต้น</li>
+                <li>ปรับปรุง UI/UX ให้ทันสมัยและใช้งานง่ายมากขึ้น</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>การเปลี่ยนแปลงหลัก</h2>
+            
+            <h3>1. การเพิ่มไลบรารีที่จำเป็น</h3>
+            <div class="feature-card">
+                <p>ได้เพิ่มไลบรารีใหม่ในไฟล์ pubspec.yaml เพื่อช่วยในการพัฒนา UI ที่ทันสมัย:</p>
+                <ul>
+                    <li><strong>velocity_x: ^4.1.1</strong> - ไลบรารีที่ช่วยให้การเขียนโค้ด Flutter มีความกระชับและอ่านง่ายมากขึ้น</li>
+                    <li><strong>carousel_slider: ^4.2.1</strong> - สำหรับสร้าง Carousel ของภาพ</li>
+                    <li><strong>flutter_rating_bar: ^4.0.1</strong> - สำหรับการให้คะแนนดาว</li>
+                    <li><strong>shimmer: ^3.0.0</strong> - สำหรับสร้าง Loading Effect แบบ Shimmer</li>
+                </ul>
+            </div>
+            
+            <h3>2. การปรับปรุงไฟล์หลัก (main.dart)</h3>
+            <div class="feature-card">
+                <p>ไฟล์ main.dart ได้รับการปรับปรุงเพื่อรองรับ:</p>
+                <ul>
+                    <li>การใช้ Material Design 3 (<code>useMaterial3: true</code>)</li>
+                    <li>การสร้างธีมสว่าง (Light Theme) และธีมมืด (Dark Theme) ด้วย <code>ColorScheme.fromSeed</code></li>
+                    <li>ความสามารถในการสลับระหว่างธีมด้วย <code>toggleTheme</code> function</li>
+                    <li>เปลี่ยนจาก StatelessWidget เป็น StatefulWidget เพื่อจัดการสถานะธีม</li>
+                </ul>
+                <p>เปรียบเทียบโค้ดเดิมและโค้ดใหม่:</p>
+                <div class="code-comparison">
+                    <div class="old-code">
+                        <h4>โค้ดเดิม:</h4>
+                        <pre>
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Movie App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.blue,
+          foregroundColor: Colors.white,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
+        ),
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => const HomeScreen(),
+        '/admin': (context) => const AdminScreen(),
+      },
+    );
+  }
+}</pre>
+                    </div>
+                    <div class="new-code">
+                        <h4>โค้ดใหม่:</h4>
+                        <pre>
+class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  ThemeMode _themeMode = ThemeMode.system;
+
+  void toggleTheme() {
+    setState(() {
+      _themeMode = _themeMode == ThemeMode.light 
+          ? ThemeMode.dark 
+          : ThemeMode.light;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Movie App',
+      themeMode: _themeMode,
+      theme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.light,
+        ),
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+        ),
+        cardTheme: CardTheme(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      darkTheme: ThemeData(
+        useMaterial3: true,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.blue,
+          brightness: Brightness.dark,
+        ),
+        appBarTheme: const AppBarTheme(
+          centerTitle: false,
+        ),
+        cardTheme: CardTheme(
+          elevation: 2,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      initialRoute: '/',
+      routes: {
+        '/': (context) => HomeScreen(toggleTheme: toggleTheme),
+        '/admin': (context) => const AdminScreen(),
+      },
+    );
+  }
+}</pre>
+                    </div>
+                </div>
+                <p>การเปลี่ยนแปลงที่สำคัญ:</p>
+                <ul>
+                    <li>ใช้ <code>useMaterial3: true</code> เพื่อเปิดใช้งาน Material Design 3</li>
+                    <li>ใช้ <code>ColorScheme.fromSeed</code> แทน <code>primarySwatch</code> เพื่อสร้างชุดสีที่กลมกลืนกันมากขึ้น</li>
+                    <li>เพิ่มการกำหนดค่า <code>darkTheme</code> สำหรับธีมมืด</li>
+                    <li>ใช้ <code>themeMode</code> เพื่อควบคุมโหมดธีมปัจจุบัน</li>
+                    <li>ส่ง function <code>toggleTheme</code> ไปยัง HomeScreen เพื่อให้ผู้ใช้สามารถสลับธีมได้</li>
+                </ul>
+            </div>
+            
+            <h3>3. หน้าแสดงรายการภาพยนตร์ (HomeScreen)</h3>
+            <div class="feature-card">
+                <p>การปรับปรุงหน้า HomeScreen:</p>
+                <ul>
+                    <li>เพิ่ม Carousel สำหรับแสดงภาพยนตร์ที่แนะนำ</li>
+                    <li>เพิ่มระบบ Tabs สำหรับแบ่งหมวดหมู่ภาพยนตร์</li>
+                    <li>เพิ่ม Bottom Navigation Bar ที่ทันสมัย</li>
+                    <li>ปรับปรุง UI ของการ์ดภาพยนตร์ให้ทันสมัยมากขึ้น</li>
+                    <li>เพิ่มฟีเจอร์การค้นหาภาพยนตร์</li>
+                    <li>เพิ่มระบบกรองภาพยนตร์ด้วย Bottom Sheet</li>
+                    <li>ใช้ VelocityX สำหรับการเขียนโค้ดที่กระชับขึ้น</li>
+                    <li>ใช้ Shimmer Effect สำหรับการโหลดข้อมูล</li>
+                </ul>
+                <p>เปรียบเทียบการสร้าง Card แสดงภาพยนตร์:</p>
+                <div class="code-comparison">
+                    <div class="old-code">
+                        <h4>โค้ดเดิม:</h4>
+                        <pre>
+Widget _buildPosterImage() {
+  return Expanded(
+    child: movie.posterUrl != null
+        ? Image.network(
+            movie.posterUrl!,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            errorBuilder: (_, __, ___) =>
+                const Center(child: Icon(Icons.movie, size: 50)),
+          )
+        : Container(
+            color: Colors.grey[300],
+            child: const Center(child: Icon(Icons.movie, size: 50)),
+          ),
+  );
+}
+
+Widget _buildMovieInfo() {
+  return Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          movie.title,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const SizedBox(height: 4),
+        Row(
+          children: [
+            const Icon(Icons.star, color: Colors.amber, size: 14),
+            Text(' ${movie.rating.toStringAsFixed(1)}'),
+            Text(' • ${movie.releaseYear}'),
+          ],
+        ),
+      ],
+    ),
+  );
+}</pre>
+                    </div>
+                    <div class="new-code">
+                        <h4>โค้ดใหม่:</h4>
+                        <pre>
+Widget _buildPosterImage() {
+  return Hero(
+    tag: 'movie-poster-${movie.id}',
+    child: AspectRatio(
+      aspectRatio: 2/3,
+      child: movie.posterUrl != null
+          ? Image.network(
+              movie.posterUrl!,
+              fit: BoxFit.cover,
+              width: double.infinity,
+              errorBuilder: (_, __, ___) =>
+                  Container(
+                    color: Colors.grey[300],
+                    child: const Icon(Icons.movie, size: 50),
+                  ),
+            )
+          : Container(
+              color: Colors.grey[300],
+              child: const Icon(Icons.movie, size: 50),
+            ),
+    ),
+  );
+}
+
+Widget _buildMovieInfo(BuildContext context) {
+  return VStack([
+    movie.title.text.medium.ellipsis.make().px12().pt12(),
+    HStack([
+      const Icon(Icons.star, color: Colors.amber, size: 16),
+      4.widthBox,
+      movie.rating.toStringAsFixed(1).text.make(),
+      8.widthBox,
+      movie.releaseYear.toString().text.make(),
+    ]).px12().py8(),
+  ]);
+}</pre>
+                    </div>
+                </div>
+                <p>การเปลี่ยนแปลงที่สำคัญ:</p>
+                <ul>
+                    <li>ใช้ <code>Hero</code> animation เพื่อให้การเปลี่ยนหน้าจอดูสวยงามและเป็นมืออาชีพมากขึ้น</li>
+                    <li>ใช้ <code>AspectRatio</code> แทน <code>Expanded</code> เพื่อรักษาอัตราส่วนของโปสเตอร์ภาพยนตร์</li>
+                    <li>ใช้ VelocityX ในการเขียนส่วน UI เช่น <code>VStack</code>, <code>HStack</code>, <code>.text.make()</code></li>
+                    <li>ใช้ Extension methods ของ VelocityX เช่น <code>.px12()</code>, <code>.py8()</code>, <code>.medium</code></li>
+                    <li>ใช้ <code>widthBox</code> แทน <code>SizedBox</code> เพื่อสร้างช่องว่างระหว่าง Widget</li>
+                </ul>
+            </div>
+            
+            <h3>4. หน้ารายละเอียดภาพยนตร์ (MovieDetailScreen)</h3>
+            <div class="feature-card">
+                <p>การปรับปรุงหน้า MovieDetailScreen:</p>
+                <ul>
+                    <li>เปลี่ยนแปลง Layout ให้ใช้ <code>CustomScrollView</code> กับ <code>SliverAppBar</code></li>
+                    <li>เพิ่มปุ่มเพิ่มในรายการโปรดและปุ่มแชร์</li>
+                    <li>เพิ่มความสามารถในการให้คะแนนภาพยนตร์ด้วย Rating Bar</li>
+                    <li>เพิ่มปุ่มสำหรับดูตัวอย่างภาพยนตร์</li>
+                    <li>เพิ่มระบบการจองตั๋วภาพยนตร์ผ่าน Bottom Sheet</li>
+                    <li>ปรับปรุง Loading State, Error State และ Empty State</li>
+                    <li>ใช้ Hero Animation สำหรับการเปลี่ยนหน้าจอที่ราบรื่น</li>
+                    <li>ใช้ Shimmer Effect สำหรับการโหลดข้อมูล</li>
+                </ul>
+                <p>การใช้ Bottom Sheet สำหรับการจองตั๋ว:</p>
+                <pre>
+void _openBookingSheet(Movie movie) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+    ),
+    builder: (context) => BookingBottomSheet(movie: movie),
+  );
+}</pre>
+                <p>ซึ่งใน BookingBottomSheet มีระบบเลือกวันที่, เวลา, และจำนวนตั๋ว รวมถึงการแสดงราคา</p>
+            </div>
+            
+            <h3>5. หน้าจัดการภาพยนตร์ (AdminScreen)</h3>
+            <div class="feature-card">
+                <p>การปรับปรุงหน้า AdminScreen:</p>
+                <ul>
+                    <li>เพิ่มระบบ Tabs แบ่งเป็นส่วนจัดการภาพยนตร์และสถิติ</li>
+                    <li>เพิ่มความสามารถในการค้นหาภาพยนตร์</li>
+                    <li>เพิ่มการสลับระหว่างมุมมองแบบรายการ (List View) และแบบตาราง (Grid View)</li>
+                    <li>ปรับปรุง UI ของการแสดงภาพยนตร์</li>
+                    <li>เพิ่มหน้ากราฟแสดงสถิติการกระจายของหมวดหมู่และคะแนน</li>
+                    <li>ใช้ VxToast แทนการใช้ SnackBar สำหรับการแจ้งเตือน</li>
+                    <li>ปรับปรุง Loading State, Error State และ Empty State</li>
+                </ul>
+            </div>
+            
+            <h3>6. การใช้ VelocityX</h3>
+            <div class="feature-card">
+                <p>VelocityX ช่วยให้การเขียนโค้ด Flutter มีความกระชับและอ่านง่ายขึ้น:</p>
+                <table>
+                    <tr>
+                        <th>โค้ดแบบปกติ</th>
+                        <th>โค้ดแบบใช้ VelocityX</th>
+                    </tr>
+                    <tr>
+                        <td>
+                            <pre>
+Text(
+  'Movie App',
+  style: TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+  ),
+)</pre>
+                        </td>
+                        <td>
+                            <pre>
+"Movie App".text.xl.bold.make()</pre>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <pre>
+Container(
+  padding: EdgeInsets.all(16),
+  decoration: BoxDecoration(
+    color: Colors.grey[200],
+    borderRadius: BorderRadius.circular(10),
+  ),
+  child: Text('Content'),
+)</pre>
+                        </td>
+                        <td>
+                            <pre>
+"Content".text.make().p16().box.roundedSM.gray200.make()</pre>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <pre>
+Column(
+  children: [
+    Text('Title'),
+    SizedBox(height: 8),
+    Text('Subtitle'),
+  ],
+)</pre>
+                        </td>
+                        <td>
+                            <pre>
+VStack([
+  "Title".text.make(),
+  8.heightBox,
+  "Subtitle".text.make(),
+])</pre>
+                        </td>
+                    </tr>
+                </table>
+                <p>ข้อดีของการใช้ VelocityX:</p>
+                <ul>
+                    <li>โค้ดมีความกระชับมากขึ้น</li>
+                    <li>อ่านง่ายและเข้าใจได้เร็วขึ้น</li>
+                    <li>ลดการเขียนโค้ดซ้ำซ้อน</li>
+                    <li>มี Extension methods ที่ช่วยให้การทำงานกับ Widget สะดวกยิ่งขึ้น</li>
+                    <li>มีการจัดการ State, Animation และ UI Elements ที่ใช้งานง่าย</li>
+                </ul>
+            </div>
+        </section>
+        
+        <section>
+            <h2>Material Design 3 Components ที่นำมาใช้</h2>
+            <div class="feature-card">
+                <p>ได้นำ Components ต่างๆ ของ Material Design 3 มาใช้ในแอปพลิเคชัน:</p>
+                <ol>
+                    <li><strong>Navigation Bar</strong> - ใช้ <code>NavigationBar</code> แทน <code>BottomNavigationBar</code> แบบเดิม ทำให้มีการแสดงผลที่ทันสมัยมากขึ้น</li>
+                    <li><strong>Cards</strong> - ปรับแต่ง Card ให้มีมุมมน (rounded corners) และเงา (elevation) ตามแนวทางของ Material Design 3</li>
+                    <li><strong>Bottom Sheet</strong> - ใช้สำหรับการแสดงตัวกรองภาพยนตร์และระบบการจองตั๋ว</li>
+                    <li><strong>Dialogs</strong> - ปรับแต่ง Dialog ให้มีรูปแบบตาม Material Design 3</li>
+                    <li><strong>Chips</strong> - ใช้ <code>FilterChip</code> และ <code>ChoiceChip</code> สำหรับการกรองและการเลือกตัวเลือก</li>
+                    <li><strong>Tabs</strong> - ใช้ <code>TabBar</code> และ <code>TabBarView</code> สำหรับการแบ่งเนื้อหาเป็นแท็บ</li>
+                    <li><strong>Loading Indicator</strong> - ใช้ Shimmer Effect แทนการใช้ CircularProgressIndicator แบบเดิม</li>
+                </ol>
+            </div>
+        </section>
+        
+        <section>
+            <h2>สรุป</h2>
+            <div class="feature-card">
+                <p>การปรับปรุงแอปพลิเคชัน Movie App นี้ช่วยให้:</p>
+                <ul>
+                    <li>แอปพลิเคชันมีความทันสมัยด้วย Material Design 3</li>
+                    <li>ผู้ใช้สามารถเลือกใช้งานในโหมดสว่างหรือโหมดมืดได้</li>
+                    <li>มีฟีเจอร์เพิ่มเติมที่ช่วยเพิ่มประสบการณ์การใช้งาน เช่น การค้นหา, การกรอง, การให้คะแนน</li>
+                    <li>โค้ดมีความกระชับและอ่านง่ายขึ้นด้วยการใช้ VelocityX</li>
+                    <li>มีการแสดงผลที่สวยงามและมีความเป็นมืออาชีพมากขึ้น</li>
+                </ul>
+                <p>การปรับปรุงนี้เป็นการยกระดับคุณภาพของแอปพลิเคชันให้ตอบโจทย์ความต้องการของผู้ใช้ในปัจจุบันมากขึ้น และเพิ่มความสามารถในการแข่งขันกับแอปพลิเคชันอื่นๆ ในตลาด</p>
+            </div>
+        </section>
+    </div>
+</body>
+</html> 
